@@ -49,6 +49,12 @@
                     @endforelse
                 </tbody>
             </table>
+            <!-- Boton volver -->
+             
+            <div class="px-6 py-4">
+                <a href="{{ route('admin.dashboard') }}" class="text-blue-500 hover:text-blue-700">Volver al Dashboard</a>
+            </div>
+            <!-- Boton volver -->
         </div>
     </div>
 

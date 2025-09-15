@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-blue-500 border-b border-gray-100 h-20">
+<nav x-data="{ open: false }" class="bg-blue-500 h-20">
     <!-- Primary Navigation Menu -->
     <div class="flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 justify-between items-center h-full">
         
@@ -84,8 +84,8 @@
         <!-- Authenticated user options in mobile -->
         @auth
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-white">
-                {{ __('Dashboard') }}
+            <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')" class="text-white bg-blue-700">
+                {{ __('Home') }}
             </x-responsive-nav-link>
         </div>
 

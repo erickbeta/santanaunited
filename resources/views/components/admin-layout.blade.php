@@ -29,7 +29,6 @@
                         <i class="fa-solid fa-images mr-2"></i>
                         Carrusel
                     </a>
-                    {{-- Aquí irán más enlaces de navegación --}}
                 </nav>
             </div>
         </aside>
