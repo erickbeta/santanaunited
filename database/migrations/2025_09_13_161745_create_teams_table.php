@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('logo_path')->nullable();
             $table->string('category')->nullable();
+            $table->integer('points')->unsigned()->default(0);
             $table->timestamps();
         });
     }

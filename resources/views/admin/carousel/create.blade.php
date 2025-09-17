@@ -1,8 +1,5 @@
-@extends('layouts.admin')
+<x-admin-layout :title="'Agregar Imagen'">
 
-@section('title', 'Añadir Nueva Imagen al Carrusel')
-
-@section('content')
     <div class="container mx-auto">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Añadir Nueva Imagen</h1>
 
@@ -29,6 +26,14 @@
                     <label for="image_path" class="block text-gray-700 font-bold mb-2">Archivo de Imagen</label>
                     <input type="file" name="image_path" id="image_path" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="is_active">
+                        ¿Activo?
+                    </label>
+                    <input name="is_active" id="is_active" type="checkbox" value="1" checked>
+                    <span class="text-sm text-gray-600"> (La imagen será visible en el carrusel)</span>
+                </div>
+
                 
                 <div class="flex items-center justify-end">
                     <a href="{{ route('admin.carousel.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">Cancelar</a>
@@ -39,4 +44,4 @@
             </form>
         </div>
     </div>
-@endsection
+</x-admin-layout>

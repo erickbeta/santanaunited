@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('team_id')->constrained()->onDelete('cascade');
+            $table->foreignId('team_id')->constrained('teams')->onDelete('cascade');
             $table->string('name');
             $table->integer('jersey_number')->nullable();
-            $table->string('position')->nullable(); // Ej: Delantero, Defensa
+            $table->string('position')->nullable();
+            $table->string('photo_url')->nullable();
+            $table->integer('goals')->default(0);
+            $table->integer('assists')->default(0);
             $table->date('birth_date')->nullable();
-            $table->string('photo_path')->nullable();
+            $table->boolean('is_featured')->default(false);
             $table->timestamps();
         });
     }

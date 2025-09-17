@@ -4,6 +4,14 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminCarouselImageController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\GameController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\Admin\AdminGameController;
+use App\Http\Controllers\Admin\AdminPostController;
+use App\Http\Controllers\Admin\AdminPlayerController;
+use App\Http\Controllers\Admin\AdminTeamController;
 
 
 
@@ -26,7 +34,17 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     })->name('dashboard');
 
     Route::resource('carousel', AdminCarouselImageController::class);
+    Route::resource('games', AdminGameController::class);
+    Route::resource('posts', AdminPostController::class);
+    Route::resource('players', AdminPlayerController::class);
+    Route::resource('teams', AdminTeamController::class);
 
 });
+
+Route::resource('games', GameController::class)->only(['index', 'show'])->names('games');
+Route::resource('posts', PostController::class)->only(['index', 'show'])->names('posts');
+Route::resource('players', PlayerController::class)->only(['index', 'show'])->names('players');
+Route::get('/standings', [TeamController::class, 'index'])->name('stats.index');
+
 
 require __DIR__.'/auth.php';

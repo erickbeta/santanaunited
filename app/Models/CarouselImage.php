@@ -11,5 +11,6 @@ class CarouselImage extends Model
         'title', 
         'caption', 
         'order',
+        'is_active',
     ];
 }
