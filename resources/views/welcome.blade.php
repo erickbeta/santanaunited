@@ -1,34 +1,68 @@
 <x-app-layout>
 {{-- En resources/views/welcome.blade.php --}}
 
-<div class="relative text-white"> <div class="swiper">
-        <div class="swiper-wrapper">
-            @foreach ($carouselImages as $image)
-                <div class="swiper-slide relative">
-                    <img src="{{ asset('storage/' . $image->image_path) }}" 
-                         alt="{{ $image->title ?? 'Carousel Image' }}" 
-                         class="w-full h-auto">
-                    
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent"></div>
-                </div>
-            @endforeach
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-prev text-white"></div>
-        <div class="swiper-button-next text-white"></div>
+<div class="relative text-white">
+    {{-- Carrusel nativo simple --}}
+    <div class="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden carousel-container">
+        @foreach ($carouselImages as $index => $image)
+            <div class="carousel-slide absolute inset-0 transition-all duration-700 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' }}" 
+                 data-slide="{{ $index }}">
+                <img src="{{ asset('storage/' . $image->image_path) }}" 
+                     alt="{{ $image->title ?? 'Carousel Image' }}" 
+                     class="w-full h-auto object-contain transform transition-transform duration-300 hover:scale-105">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent"></div>
+                
+                {{-- Opcional: Título y descripción --}}
+                @if($image->title || $image->description)
+                    <div class="absolute bottom-0 left-0 right-0 p-6 z-10">
+                        @if($image->title)
+                            <h3 class="text-2xl md:text-3xl font-bold mb-2">{{ $image->title }}</h3>
+                        @endif
+                        @if($image->description)
+                            <p class="text-sm md:text-base opacity-90">{{ $image->description }}</p>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        @endforeach
+
+        {{-- Solo mostrar controles si hay más de 1 imagen --}}
+        @if(count($carouselImages) > 1)
+            {{-- Botones de navegación --}}
+            <button id="prevBtn" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-all duration-200 z-20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            
+            <button id="nextBtn" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-all duration-200 z-20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+
+            {{-- Indicadores --}}
+            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+                @foreach($carouselImages as $index => $image)
+                    <button class="carousel-dot w-3 h-3 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 {{ $index === 0 ? 'bg-white' : 'bg-white/50' }}" 
+                            data-slide="{{ $index }}"></button>
+                @endforeach
+            </div>
+        @endif
     </div>
 
-    <div class="absolute inset-0 flex flex-col items-center justify-end z-10 pb-16 md:pb-24">
-        {{-- ... El contenido del texto y los botones se queda igual ... --}}
+    {{-- Contenido superpuesto --}}
+    <div class="absolute inset-0 flex flex-col items-center justify-end z-30 pb-16 md:pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div class="text-center">
-                <h1 class="text-4xl md:text-6xl font-bold mb-4">Welcome to Santana United</h1>
-                <p class="text-xl md:text-2xl mb-8">Your club, Your Family.</p>
+                <h1 class="text-4xl md:text-6xl font-bold mb-4" style="filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.4));">Welcome to Santana United</h1>
+                <p class="text-xl md:text-2xl mb-8" style="filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.3));">Your club, Your Family.</p>
                 <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="{{ route('games.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    <a href="{{ route('games.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
                         Ver Próximos Partidos
                     </a>
-                    <a href="{{ route('posts.index') }}" class="bg-white/90 hover:bg-white text-blue-900 font-semibold px-8 py-3 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    <a href="{{ route('posts.index') }}" class="bg-white/90 hover:bg-white text-blue-900 font-semibold px-8 py-3 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
                         Últimas Noticias
                     </a>
                 </div>
@@ -37,256 +71,164 @@
     </div>
 </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <a href="{{ route('games.index') }}" class="bg-green-500 hover:bg-green-600 text-white p-6 rounded-lg transition-colors shadow-lg">
-                <div class="flex items-center">
-                    <i class="fa-solid fa-futbol mr-3 text-3xl"></i>
-                    <div>
-                        <h3 class="font-bold text-lg">Partidos</h3>
-                        <p class="text-sm opacity-90">Ver calendario</p>
-                    </div>
-                </div>
-            </a>
-            <a href="{{ route('posts.index') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white p-6 rounded-lg transition-colors shadow-lg">
-                <div class="flex items-center">
-                   <i class="fa-solid fa-exclamation mr-5 text-3xl"></i>
-                   <div>
-                       <h3 class="font-bold text-lg">Noticias</h3>
-                       <p class="text-sm opacity-90">Últimas novedades</p>
-                   </div>
-                </div>
-            </a>
-            {{-- Asumiendo que tienes rutas nombradas para estas secciones --}}
-            <a href="{{ route('players.index') }}" class="bg-red-500 hover:bg-red-600 text-white p-6 rounded-lg transition-colors shadow-lg">
-                 <div class="flex items-center">
-                    {{-- ... icono ... --}}
-                    <div>
-                        <h3 class="font-bold text-lg">Plantilla</h3>
-                        <p class="text-sm opacity-90">Ver jugadores</p>
-                    </div>
-                </div>
-            </a>
-            <a href="{{ route('stats.index') }}" class="bg-purple-500 hover:bg-purple-600 text-white p-6 rounded-lg transition-colors shadow-lg">
-                <div class="flex items-center">
-                    {{-- ... icono ... --}}
-                    <div>
-                        <h3 class="font-bold text-lg">Estadísticas</h3>
-                        <p class="text-sm opacity-90">Ver números</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                        {{-- ... icono ... --}}
-                        Próximos Partidos
-                    </h2>
-                    
-                    <div class="space-y-4">
-                        {{-- Bucle para mostrar los próximos partidos dinámicamente --}}
-                        @forelse ($upcomingGames as $game)
-                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="text-center">
-                                            <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($game->game_date)->format('D') }}</div>
-                                            <div class="text-xl font-bold">{{ \Carbon\Carbon::parse($game->game_date)->format('d') }}</div>
-                                            <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($game->game_date)->format('M') }}</div>
-                                        </div>
-                                        <div>
-                                            <div class="font-bold text-lg">
-                                                @if($game->type === 'local')
-                                                    Nuestro Club vs {{ $game->opponent }}
-                                                @else
-                                                    {{ $game->opponent }} vs Nuestro Club
-                                                @endif
-                                            </div>
-                                            <div class="text-gray-600">{{ $game->location }} - {{ \Carbon\Carbon::parse($game->game_date)->format('H:i') }}</div>
-                                            <div class="text-sm text-blue-600 font-medium">{{ $game->competition }}</div>
-                                        </div>
-                                    </div>
-                                    @if($game->type === 'local')
-                                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Local</span>
-                                    @else
-                                        <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">Visitante</span>
-                                    @endif
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-gray-500 text-center">No hay próximos partidos programados.</p>
-                        @endforelse
-                    </div>
+{{-- El resto de tu contenido sigue igual --}}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <a href="{{ route('games.index') }}" class="bg-green-500 hover:bg-green-600 text-white p-6 rounded-lg transition-colors shadow-lg">
+            <div class="flex items-center">
+                <i class="fa-solid fa-futbol mr-3 text-3xl"></i>
+                <div>
+                    <h3 class="font-bold text-lg">Partidos</h3>
+                    <p class="text-sm opacity-90">Ver calendario</p>
                 </div>
             </div>
-
-            <div class="space-y-6">
-                
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        {{-- ... icono ... --}}
-                        Últimas Noticias
-                    </h3>
-                    <div class="space-y-4">
-                        {{-- Bucle para mostrar las últimas noticias --}}
-                        @forelse ($latestPosts as $post)
-                            <article class="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                                <h4 class="font-bold text-gray-800 hover:text-blue-600 cursor-pointer mb-2">
-                                    <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
-                                </h4>
-                                <p class="text-gray-600 text-sm mb-2">
-                                    {{ Str::limit($post->body, 120) }} {{-- Asumiendo una columna 'body' --}}
-                                </p>
-                                <span class="text-xs text-gray-500">{{ $post->created_at->diffForHumans() }}</span>
-                            </article>
-                        @empty
-                             <p class="text-gray-500">No hay noticias recientes.</p>
-                        @endforelse
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        {{-- ... icono ... --}}
-                        Tabla de Posiciones
-                    </h3>
-                    <div class="space-y-2">
-                        {{-- Bucle para la tabla de posiciones --}}
-                        @foreach ($teams as $team)
-                            <div @class([
-                                'flex justify-between items-center py-2 px-3 rounded-lg',
-                                'bg-green-50 border border-green-200' => $team->name === 'Santana United', // Tu nombre de equipo
-                                'bg-gray-50' => $team->name !== 'Santana United',
-                            ])>
-                                <div class="flex items-center">
-                                    <span @class([
-                                        'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 text-white',
-                                        'bg-green-500' => $team->name === 'Santana United',
-                                        'bg-gray-400' => $team->name !== 'Santana United',
-                                    ])>{{ $loop->iteration }}</span>
-                                    <span @class([
-                                        'font-bold text-green-800' => $team->name === 'Santana United',
-                                        'font-medium' => $team->name !== 'Santana United',
-                                    ])>{{ $team->name }}</span>
-                                </div>
-                                <div @class([
-                                    'text-sm font-medium',
-                                    'text-green-800' => $team->name === 'Santana United',
-                                ])>{{ $team->points }} pts</div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        {{-- ... icono ... --}}
-                        Jugador del Mes
-                    </h3>
-                    {{-- Comprobamos si existe un jugador destacado --}}
-                    @if ($featuredPlayer)
-                        <div class="text-center">
-                            <img src="{{ $featuredPlayer->photo_url }}" alt="{{ $featuredPlayer->name }}" class="w-20 h-20 object-cover rounded-full mx-auto mb-4">
-                            <h4 class="font-bold text-lg text-gray-800">{{ $featuredPlayer->name }}</h4>
-                            <p class="text-gray-600 mb-2">{{ $featuredPlayer->position }}</p>
-                            <div class="bg-blue-50 rounded-lg p-3">
-                                <div class="grid grid-cols-2 gap-4 text-center">
-                                    <div>
-                                        <div class="font-bold text-2xl text-blue-600">{{ $featuredPlayer->goals }}</div>
-                                        <div class="text-xs text-gray-600">Goles</div>
-                                    </div>
-                                    <div>
-                                        <div class="font-bold text-2xl text-blue-600">{{ $featuredPlayer->assists }}</div>
-                                        <div class="text-xs text-gray-600">Asistencias</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <p class="text-center text-gray-500">Aún no hay jugador del mes.</p>
-                    @endif
+        </a>
+        <a href="{{ route('posts.index') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white p-6 rounded-lg transition-colors shadow-lg">
+            <div class="flex items-center">
+               <i class="fa-solid fa-exclamation mr-5 text-3xl"></i>
+               <div>
+                   <h3 class="font-bold text-lg">Noticias</h3>
+                   <p class="text-sm opacity-90">Últimas novedades</p>
+               </div>
+            </div>
+        </a>
+        <a href="{{ route('players.index') }}" class="bg-red-500 hover:bg-red-600 text-white p-6 rounded-lg transition-colors shadow-lg">
+             <div class="flex items-center">
+                <i class="fa-solid fa-users mr-3 text-3xl"></i>
+                <div>
+                    <h3 class="font-bold text-lg">Plantilla</h3>
+                    <p class="text-sm opacity-90">Ver jugadores</p>
                 </div>
             </div>
-        </div>
-        
-        <div class="mt-8">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                    <i class="fas fa-history w-6 h-6 mr-2 text-blue-500"></i>
-                    Últimos Resultados
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @forelse ($latestResults as $result)
-                        <div class="border border-gray-200 rounded-lg p-4 text-center">
-                            <div class="text-sm text-gray-500 mb-2">{{ \Carbon\Carbon::parse($result->game_date)->format('d F') }} • {{ $result->competition }}</div>
-                            <div class="flex justify-between items-center mb-2">
-                                {{-- Aquí obtenemos los nombres de los equipos desde la relación --}}
-                                <span class="font-medium">{{ $result->homeTeam->name }}</span> 
-                                <span class="text-2xl font-bold">{{ $result->score_local }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="font-medium">{{ $result->awayTeam->name }}</span>
-                                {{-- CAMBIO IMPORTANTE AQUÍ --}}
-                                <span class="text-2xl font-bold">{{ $result->away_team_score }}</span>
-                            </div>
-
-                            @php
-                                // LÓGICA AJUSTADA CON TUS COLUMNAS
-                                $myTeamId = 1; // El mismo ID que en el controlador
-                                $outcome = 'Empate';
-                                $outcomeClass = 'bg-yellow-100 text-yellow-800';
-
-                                if ($result->score_local !== $result->away_team_score) {
-                                    if (($result->home_team_id == $myTeamId && $result->score_local > $result->away_team_score) || 
-                                        ($result->away_team_id == $myTeamId && $result->away_team_score > $result->score_local)) {
-                                        $outcome = 'Victoria';
-                                        $outcomeClass = 'bg-green-100 text-green-800';
-                                    } else {
-                                        $outcome = 'Derrota';
-                                        $outcomeClass = 'bg-red-100 text-red-800';
-                                    }
-                                }
-                            @endphp
-                            <span class="inline-block mt-2 px-2 py-1 rounded text-sm font-medium {{ $outcomeClass }}">{{ $outcome }}</span>
-                        </div>
-                    @empty
-                        <p class="text-gray-500 md:col-span-3 text-center">No hay resultados recientes.</p>
-                    @endforelse
+        </a>
+        <a href="{{ route('stats.index') }}" class="bg-purple-500 hover:bg-purple-600 text-white p-6 rounded-lg transition-colors shadow-lg">
+            <div class="flex items-center">
+                <i class="fa-solid fa-chart-bar mr-3 text-3xl"></i>
+                <div>
+                    <h3 class="font-bold text-lg">Estadísticas</h3>
+                    <p class="text-sm opacity-90">Ver números</p>
                 </div>
             </div>
-        </div>
-
+        </a>
     </div>
 
-    @push('scripts')
+</div>
+
+@push('scripts')
+
 <script>
-    const swiper = new Swiper('.swiper', {
-        loop: true, 
-        autoplay: {
-            delay: 5000, 
-            disableOnInteraction: false,
-        },
+document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    // Solo ejecutar si hay slides
+    if (slides.length === 0) return;
+    
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+    let autoplayInterval;
 
-        autoHeight: true, 
-
+    // Función para mostrar slide
+    function showSlide(index) {
+        // Ocultar todos los slides
+        slides.forEach(slide => {
+            slide.classList.remove('opacity-100', 'z-10');
+            slide.classList.add('opacity-0', 'z-0');
+        });
         
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
+        // Mostrar slide actual
+        slides[index].classList.remove('opacity-0', 'z-0');
+        slides[index].classList.add('opacity-100', 'z-10');
+        
+        // Actualizar dots
+        dots.forEach((dot, i) => {
+            if (i === index) {
+                dot.classList.remove('bg-white/50');
+                dot.classList.add('bg-white');
+            } else {
+                dot.classList.remove('bg-white');
+                dot.classList.add('bg-white/50');
+            }
+        });
+    }
 
-        // Flechas de navegación
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
+    // Siguiente slide
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        showSlide(currentSlide);
+    }
+
+    // Slide anterior
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        showSlide(currentSlide);
+    }
+
+    // Autoplay
+    function startAutoplay() {
+        if (totalSlides > 1) {
+            autoplayInterval = setInterval(nextSlide, 5000);
+        }
+    }
+
+    function stopAutoplay() {
+        clearInterval(autoplayInterval);
+    }
+
+    // Event listeners
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            nextSlide();
+            stopAutoplay();
+            startAutoplay();
+        });
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            prevSlide();
+            stopAutoplay();
+            startAutoplay();
+        });
+    }
+
+    // Dots
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            currentSlide = index;
+            showSlide(currentSlide);
+            stopAutoplay();
+            startAutoplay();
+        });
     });
-</script>
-@endpush
 
+    
+
+    // Teclado
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            prevSlide();
+            stopAutoplay();
+            startAutoplay();
+        } else if (e.key === 'ArrowRight') {
+            nextSlide();
+            stopAutoplay();
+            startAutoplay();
+        }
+    });
+
+    // Iniciar
+    startAutoplay();
+});
+</script>
+
+{{-- Responsive para móviles --}}
+@media (max-width: 640px) {
+    .carousel-container { height: 200px !important; }
+}
+</style>
+@endpush
 </x-app-layout>

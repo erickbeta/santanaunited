@@ -21,7 +21,8 @@ return new class extends Migration
             $table->integer('goals')->default(0);
             $table->integer('assists')->default(0);
             $table->date('birth_date')->nullable();
-            $table->boolean('is_featured')->default(false);
+            $table->boolean('is_active')->default(true); 
+            $table->boolean('is_featured')->default(false); 
             $table->timestamps();
         });
     }

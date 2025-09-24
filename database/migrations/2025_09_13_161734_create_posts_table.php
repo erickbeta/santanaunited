@@ -19,6 +19,7 @@ return new class extends Migration
             $table->longText('body');
             $table->string('featured_image')->nullable();
             $table->timestamp('published_at')->nullable();
+            $table->boolean('is_published')->default(false);
             $table->timestamps();
         });
     }

@@ -47,14 +47,12 @@ class AdminCarouselImageController extends Controller
             'order' => $request->order ?? 0,
             'image_path' => $path,
             'is_active' => $request->has('is_active'),
-
         ]);
 
         return redirect()->route('admin.carousel.index')
                          ->with('success', 'Imagen subida correctamente.');
     }
 
- 
     public function edit(CarouselImage $carousel)
     {
         return view('admin.carousel.edit', ['image' => $carousel]);
@@ -71,20 +69,15 @@ class AdminCarouselImageController extends Controller
             'caption' => 'nullable|string',
             'order' => 'integer'
         ]);
-        
-        $data = $request->except('image_path'); // Obtenemos todos los datos excepto la imagen
+        $data = $request->except('image_path'); 
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image_path')) {
-            // Si se sube una nueva imagen:
-            // 1. Borramos la imagen antigua del disco
             Storage::disk('public')->delete($carousel->image_path);
             
-            // 2. Guardamos la nueva imagen y actualizamos la ruta
-            $data['image_path'] = $request->file('image_path')->store('carousel-images', 'public');
+        $data['image_path'] = $request->file('image_path')->store('carousel-images', 'public');
         }
-
         $carousel->update($data);
-
         return redirect()->route('admin.carousel.index')
                          ->with('success', 'Imagen actualizada correctamente.');
     }
