@@ -14,7 +14,7 @@ class AdminGameController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Game::with(['homeTeam', 'awayTeam']);
+        $query = Game::with(['team1', 'team2']);
 
         // Filtros
         if ($request->filled('status')) {
@@ -84,7 +84,7 @@ class AdminGameController extends Controller
         return view('admin.games.edit', compact('game', 'teams'));
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, Game $game)
     {
         $validated = $request->validate([
             'game_date'      => 'required|date',
@@ -95,7 +95,6 @@ class AdminGameController extends Controller
             'away_team_score'=> 'nullable|integer|min:0',
         ]);
 
-        $game = Game::findOrFail($id);
         $game->update($validated);
 
         return redirect()
@@ -103,9 +102,8 @@ class AdminGameController extends Controller
             ->with('success', 'Partido actualizado exitosamente.');
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id, Game $game)
     {
-        $game = Game::findOrFail($id);
         $game->delete();
 
         return redirect()
