@@ -9,6 +9,7 @@ class Team extends Model
     protected $fillable = [
         'name', 
         'logo_path', 
-        'category'
+        'category',
+        'is_active',
     ];
 }
