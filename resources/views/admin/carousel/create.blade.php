@@ -4,27 +4,36 @@
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Añadir Nueva Imagen</h1>
 
         <div class="bg-white p-8 rounded-lg shadow-md">
-            <form action="{{ route('admin.carousel.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.carousel.store') }}" method="POST" enctype="multipart/form-data" id="image-upload-form">
                 @csrf
 
                 <div class="mb-4">
                     <label for="title" class="block text-gray-700 font-bold mb-2">Título</label>
-                    <input type="text" name="title" id="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Título opcional de la imagen">
+                    <input type="text" name="title" id="title"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="Título opcional de la imagen">
                 </div>
 
                 <div class="mb-4">
                     <label for="caption" class="block text-gray-700 font-bold mb-2">Leyenda (Caption)</label>
-                    <textarea name="caption" id="caption" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Texto que aparecerá sobre la imagen"></textarea>
+                    <textarea name="caption" id="caption" rows="3"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="Texto que aparecerá sobre la imagen"></textarea>
                 </div>
 
                 <div class="mb-4">
                     <label for="order" class="block text-gray-700 font-bold mb-2">Orden</label>
-                    <input type="number" name="order" id="order" value="0" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <input type="number" name="order" id="order" value="0"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-                
+
                 <div class="mb-6">
-                    <label for="image_path" class="block text-gray-700 font-bold mb-2">Archivo de Imagen</label>
-                    <input type="file" name="image_path" id="image_path" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    <label for="image_path" class="block text-gray-700 font-bold mb-2">Archivo de Imagen (Tamaño maximo 2048MB)</label>
+                    <input type="file" name="image_path" id="image_path"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required accept="image/jpeg,image/png,image/gif">
+                        <p id="image-error" class="text-red-500 text-xs italic mt-2"></p>
+
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="is_active">
@@ -34,14 +43,79 @@
                     <span class="text-sm text-gray-600"> (La imagen será visible en el carrusel)</span>
                 </div>
 
-                
+
                 <div class="flex items-center justify-end">
-                    <a href="{{ route('admin.carousel.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">Cancelar</a>
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                    <a href="{{ route('admin.carousel.index') }}"
+                        class="text-gray-600 hover:text-gray-800 mr-4">Cancelar</a>
+                    <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
                         Guardar Imagen
                     </button>
                 </div>
             </form>
         </div>
     </div>
+    @push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('image_path');
+        const errorContainer = document.getElementById('image-error');
+        const form = document.getElementById('image-upload-form');
+
+        
+        const MAX_FILE_SIZE = 2048 * 1024;
+        const ALLOWED_MIME_TYPES = [
+            'image/jpeg', 
+            'image/png', 
+            'image/gif', 
+            'image/svg+xml', 
+            'image/webp'
+        ];
+
+        // Función para validar un archivo
+        function validateFile(file) {
+            errorContainer.textContent = '';
+
+            if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+                errorContainer.textContent = 'Error: El formato del archivo no es válido. Solo se permiten imágenes (jpeg, png, gif, svg, webp).';
+                return false;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                errorContainer.textContent = 'Error: La imagen es demasiado grande. El tamaño máximo permitido es de 2MB.';
+                return false;
+            }
+
+            return true;
+        }
+
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+
+            if (file) {
+                if (!validateFile(file)) {
+                    imageInput.value = ''; 
+                }
+            }
+        });
+
+        // Opcional: Doble verificación al intentar enviar el formulario
+        form.addEventListener('submit', function(event) {
+            const file = imageInput.files[0];
+
+            if (file) {
+                if (!validateFile(file)) {
+                    // Prevenimos el envío del formulario si el archivo es inválido
+                    event.preventDefault();
+                    alert('Por favor, selecciona un archivo de imagen válido antes de guardar.');
+                }
+            } else if (imageInput.required) {
+                event.preventDefault();
+                errorContainer.textContent = 'Error: Debes seleccionar una imagen.';
+                alert('Por favor, selecciona una imagen.');
+            }
+        });
+    });
+</script>
+@endpush
 </x-admin-layout>
