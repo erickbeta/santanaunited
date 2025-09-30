@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
@@ -43,7 +43,8 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
 
 Route::resource('games', GameController::class)->only(['index', 'show'])->names('games');
 Route::resource('posts', PostController::class)->only(['index', 'show'])->names('posts');
-Route::resource('players', PlayerController::class)->only(['index', 'show'])->names('players');
+Route::get('/players', [PlayerController::class, 'index'])->name('players.index');
+Route::get('/players/{player}', [PlayerController::class, 'show'])->name('players.show');
 Route::get('/standings', [TeamController::class, 'index'])->name('stats.index');
 
 

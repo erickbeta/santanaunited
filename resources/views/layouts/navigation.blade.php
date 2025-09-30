@@ -1,16 +1,58 @@
-<nav x-data="{ open: false }" class="bg-blue-500 h-20">
+<nav x-data="{ open: false }" class="bg-[#1F346E] h-34">
     <!-- Primary Navigation Menu -->
     <div class="flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 justify-between items-center h-full">
         
         <!-- Logo and Main Navigation Section -->
         <div class="flex items-center space-x-8">
             <a href="#">
-                <x-application-logo class="block h-12 fill-current text-gray-800" style="margin-top:-20px;" />
+                <x-application-logo class="block h-8 fill-current text-gray-800" style="margin-top:-20px;" />
             </a>
-            <a href="{{ route('home') }}" class="text-xl text-white hover:text-gray-200 transition-colors">
-                Home
-            </a>
+            
         </div>
+
+        <div class="flex items-center space-x-8 ">
+        <a href="{{ route('home') }}" class="font-lg text-white hover:text-gray-500 transition-colors">
+                Home
+        </a>
+        <a href="{{ route('home') }}" class="text-xl text-white hover:text-gray-500 transition-colors">
+                About Us
+        </a>
+
+
+        <a href="{{ route('home') }}" class="text-xl text-white hover:text-gray-500 transition-colors">
+       @auth
+    <p>Bienvenido, {{ Auth::user()->name }}</p>
+
+    <p>Tus Roles: 
+        {{-- 1. Asegúrate de llamar a getRoleNames() --}}
+        @php
+            $roles = Auth::user()->getRoleNames();
+        @endphp
+        
+        @if ($roles->isNotEmpty())
+            {{-- 2. Implode la colección de nombres de roles para mostrarlos --}}
+            <strong>{{ implode(', ', $roles->toArray()) }}</strong>
+        @else
+            No hay roles asignados.
+        @endif
+    </p>
+
+    {{-- Lógica alternativa: Muestra el enlace de administrador solo si es admin --}}
+    @if(Auth::user()->hasRole('admin'))
+        <p><a href="{{ route('admin.dashboard') }}">Ir al Panel de Administración</a></p>
+    @endif
+@endauth
+
+
+            @guest
+                {{-- Opcional: muestra algo a los invitados --}}
+                <p>Inicia sesión para ver tu información.</p>
+            @endguest
+
+        </a>
+        </div>
+
+     
 
         <!-- Right side - Login/User dropdown -->
         @guest

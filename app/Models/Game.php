@@ -12,14 +12,19 @@ class Game extends Model
     use HasFactory;
 
     protected $fillable = [
-        'home_team_id',
+        'home_team_id', 
         'away_team_id',
         'game_date',
         'location',
+        'competition',
+        'type',
         'score_local',
         'away_team_score',
         'is_active',
+        'created_by',
+        'updated_by',
     ];
+
 
     protected $casts = [
         'is_active' => 'boolean',
@@ -28,14 +33,13 @@ class Game extends Model
 
     public function homeTeam()
     {
-        return $this->belongsTo(Team::class, 'home_team_id');
+        return $this->belongsTo(Team::class, 'team1');
     }
 
     public function awayTeam()
     {
-        return $this->belongsTo(Team::class, 'away_team_id');
+        return $this->belongsTo(Team::class, 'team2');
     }
-
 
     public function scopeUpcoming($query)
     {
@@ -44,10 +48,11 @@ class Game extends Model
                      ->orderBy('game_date', 'asc');
     }
 
-    // Solo juegos activos
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+
+
     }
 
 }
