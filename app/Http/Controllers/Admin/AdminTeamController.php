@@ -73,6 +73,7 @@ class AdminTeamController extends Controller
      */
     public function edit(string $id)
     {
+        $team = Team::findOrFail($id);
         return view('admin.teams.edit', compact('team'));
     }
 
@@ -81,13 +82,13 @@ class AdminTeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {   
-        $validated = $request->validated([
+        $validated = $request->validate([
             'name'      => ['required', 'string', 'max:255', Rule::unique('teams')->ignore($team->id)],
             'category'  => 'nullable|string|max:255',
             'logo'      => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
             'is_active' => 'sometimes|boolean',
         ]);
-        $data = $rerquest->except('logo');
+        $data = $request->except('logo');
         if($request->hasFile('logo')){
             if ($team->logo_path) {
                 Storage::disk('public')->delete($team->logo_path);

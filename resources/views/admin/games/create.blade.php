@@ -19,62 +19,44 @@
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Información del Partido</h3>
                     </div>
                     
-                    {{-- Campo para Equipo 1 --}}
+                    {{-- Campo para Equipo Local (Santa Ana United - FIJO) --}}
                     <div>
-                        <label for="team1_id" class="block text-sm font-medium text-gray-700 mb-2">Equipo 1</label>
-                        <select name="team1_id" id="team1_id" required
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('team1_id') @enderror">
-                            <option value="">Selecciona el primer equipo</option>
-                            @foreach($teams as $team)
-                                <option value="{{ $team->id }}" data-name="{{ $team->name }}" {{ old('team1_id') == $team->id ? 'selected' : '' }}>
-                                    {{ $team->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label for="team1_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Equipo Local 🏠
+                        </label>
+                        <div class="w-full border border-gray-300 bg-gray-100 rounded-lg px-3 py-2 text-gray-700 font-medium">
+                            Santa Ana United
+                        </div>
+                        <input type="hidden" name="team1_id" id="team1_id" value="{{ $santaAnaTeam->id ?? '' }}" required>
+                        <input type="hidden" name="visitor_designation" value="team2">
+                        <p class="mt-1 text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>Santa Ana United siempre juega de local en este formulario
+                        </p>
                         @error('team1_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Campo para Equipo 2 --}}
+                    {{-- Campo para Equipo Visitante --}}
                     <div>
-                        <label for="team2_id" class="block text-sm font-medium text-gray-700 mb-2">Equipo 2</label>
+                        <label for="team2_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Equipo Visitante ✈️
+                        </label>
                         <select name="team2_id" id="team2_id" required
                                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('team2_id') border-red-500 @enderror">
-                            <option value="">Selecciona el segundo equipo</option>
+                            <option value="">Selecciona el equipo visitante</option>
                             @foreach($teams as $team)
-                                <option value="{{ $team->id }}" data-name="{{ $team->name }}" {{ old('team2_id') == $team->id ? 'selected' : '' }}>
-                                    {{ $team->name }}
-                                </option>
+                                @if($team->id != ($santaAnaTeam->id ?? null))
+                                    <option value="{{ $team->id }}" data-name="{{ $team->name }}" {{ old('team2_id') == $team->id ? 'selected' : '' }}>
+                                        {{ $team->name }}
+                                    </option>
+                                @endif
                             @endforeach
                         </select>
                         @error('team2_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    {{-- Designar quién es el visitante --}}
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">¿Quién juega como visitante?</label>
-                        <div class="flex items-center space-x-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="visitor_designation" id="visitor_team1" value="team1" {{ old('visitor_designation') == 'team1' ? 'checked' : '' }} required>
-                                <label class="form-check-label ml-2" for="visitor_team1">
-                                    Equipo 1 será visitante
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="visitor_designation" id="visitor_team2" value="team2" {{ old('visitor_designation') == 'team2' ? 'checked' : '' }}>
-                                <label class="form-check-label ml-2" for="visitor_team2">
-                                    Equipo 2 será visitante
-                                </label>
-                            </div>
-                        </div>
-                         @error('visitor_designation')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
                     
                     <div>
                         <label for="game_date" class="block text-sm font-medium text-gray-700 mb-2">Fecha y Hora</label>
@@ -94,7 +76,9 @@
                                placeholder="Estadio o cancha donde se jugará"
                                list="location-suggestions">
                         <datalist id="location-suggestions">
-                            <option value="Estadio Principal"><option value="Campo Municipal"><option value="Cancha Norte">
+                            <option value="Estadio Principal">
+                            <option value="Campo Municipal">
+                            <option value="Cancha Norte">
                         </datalist>
                         @error('location')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -109,7 +93,9 @@
                                placeholder="Liga Regional, Copa Municipal, etc."
                                list="competition-suggestions">
                         <datalist id="competition-suggestions">
-                            <option value="Liga Regional"><option value="Copa Municipal"><option value="Amistoso">
+                            <option value="Liga Regional">
+                            <option value="Copa Municipal">
+                            <option value="Amistoso">
                         </datalist>
                         @error('competition')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -123,7 +109,7 @@
                     <div id="game-preview" class="text-sm text-gray-700">
                         <p class="mb-1">
                             <span class="font-medium">Partido:</span> 
-                            <span id="preview-matchup">Selecciona los equipos</span>
+                            <span id="preview-matchup">Santa Ana United (L) vs [Selecciona visitante] (V)</span>
                         </p>
                         <p class="mb-1">
                             <span class="font-medium">Fecha:</span> 
@@ -157,9 +143,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // === Elementos del formulario ===
-            const team1Select = document.getElementById('team1_id');
             const team2Select = document.getElementById('team2_id');
-            const visitorRadios = document.querySelectorAll('input[name="visitor_designation"]');
             const dateInput = document.getElementById('game_date');
             const competitionInput = document.getElementById('competition');
             const form = document.querySelector('form');
@@ -178,19 +162,9 @@
 
             // === Función para actualizar vista previa ===
             function updatePreview() {
-                // 1. Actualizar enfrentamiento
-                const team1Name = getSelectedText(team1Select) || '[Equipo 1]';
-                const team2Name = getSelectedText(team2Select) || '[Equipo 2]';
-                const visitor = document.querySelector('input[name="visitor_designation"]:checked')?.value;
-                
-                let matchupText = 'Selecciona los equipos y quién es visitante';
-                if(team1Select.value && team2Select.value && visitor) {
-                    if (visitor === 'team1') {
-                        matchupText = `${team2Name} (L) vs ${team1Name} (V)`;
-                    } else {
-                        matchupText = `${team1Name} (L) vs ${team2Name} (V)`;
-                    }
-                }
+                // 1. Actualizar enfrentamiento (Santa Ana United siempre es local)
+                const team2Name = getSelectedText(team2Select) || '[Selecciona visitante]';
+                const matchupText = `Santa Ana United (L) vs ${team2Name} (V)`;
                 previewMatchup.textContent = matchupText;
 
                 // 2. Actualizar fecha
@@ -211,9 +185,7 @@
             }
 
             // === Event listeners para actualizar vista previa ===
-            team1Select.addEventListener('change', updatePreview);
             team2Select.addEventListener('change', updatePreview);
-            visitorRadios.forEach(radio => radio.addEventListener('change', updatePreview));
             dateInput.addEventListener('input', updatePreview);
             competitionInput.addEventListener('input', updatePreview);
 

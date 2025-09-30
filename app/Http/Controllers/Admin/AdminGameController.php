@@ -51,8 +51,17 @@ class AdminGameController extends Controller
 
     public function create()
     {
-        $teams = Team::orderBy('name')->get();
-        return view('admin.games.create', compact('teams'));
+        $santaAnaTeam = Team::where('name', 'Santa Ana United')->first();
+        if (!$santaAnaTeam) {
+        return redirect()->route('admin.games.index')
+                         ->with('error', 'No se encontró el equipo Santa Ana United en la base de datos');
+    }
+
+
+        $teams = Team::where('id', '!=', $santaAnaTeam->id)
+                     ->orderBy('name')
+                     ->get();
+    return view('admin.games.create', compact('teams', 'santaAnaTeam'));
     }
 
     public function store(Request $request)
