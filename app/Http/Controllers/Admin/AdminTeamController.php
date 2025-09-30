@@ -49,7 +49,7 @@ class AdminTeamController extends Controller
 
         $data = $request->except('logo');
         if($request->hasFile('logo')){
-            $path = $request->fole('logo')->store('teams-logos', 'public');
+            $path = $request->file('logo')->store('teams-logos', 'public');
             $data['logo_path'] = $path;
         };
         $data['is_active'] = $request->has('is_active'); 

@@ -89,7 +89,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
                     <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Oponente, ubicación..." 
+                           placeholder="Ubicación..." 
                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
                 
@@ -130,11 +130,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div>
                                         <div class="text-sm font-medium text-gray-900">
-                                            @if($game->type === 'local')
-                                                Santana United vs {{ $game->opponent }}
-                                            @else
-                                                {{ $game->opponent }} vs Santana United
-                                            @endif
+                                            {{ $game->homeTeam->name }} vs {{ $game->awayTeam->name }}
                                         </div>
                                         <div class="text-sm text-gray-500">
                                             <i class="fas fa-map-marker-alt mr-1"></i>{{ $game->location }}
@@ -147,16 +143,17 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    @if($game->score_local !== null && $game->away_team_score !== null)
-                                        <span class="font-bold text-lg">{{ $game->score_local }} - {{ $game->away_team_score }}</span>
+                                    @if($game->score_local !== null && $game->score_visitor !== null)
+                                        <span class="font-bold text-lg">{{ $game->score_local }} - {{ $game->score_visitor }}</span>
                                         @php
-                                            $result = '';
-                                            $resultClass = '';
-                                            if (($game->type === 'local' && $game->score_local > $game->away_team_score) || 
-                                                ($game->type === 'visitante' && $game->away_team_score > $game->score_local)) {
+                                            // Determinar si Santa Ana ganó
+                                            $santanaScore = ($game->home_team_id === $game->team1_id) ? $game->score_local : $game->score_visitor;
+                                            $rivalScore = ($game->home_team_id === $game->team1_id) ? $game->score_visitor : $game->score_local;
+                                            
+                                            if ($santanaScore > $rivalScore) {
                                                 $result = 'Victoria';
                                                 $resultClass = 'text-green-600';
-                                            } elseif ($game->score_local === $game->away_team_score) {
+                                            } elseif ($santanaScore === $rivalScore) {
                                                 $result = 'Empate';
                                                 $resultClass = 'text-yellow-600';
                                             } else {
@@ -173,7 +170,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex flex-col space-y-1">
-                                        @if($game->type === 'local')
+                                        @if($game->home_team_id === $game->team1_id)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 <i class="fas fa-home mr-1"></i>Local
                                             </span>
@@ -206,7 +203,7 @@
                                         </a>
                                         
                                         {{-- Botón para actualizar resultado rápido --}}
-                                        @if($game->game_date < now() && ($game->score_local === null || $game->away_team_score === null))
+                                        @if($game->game_date < now() && ($game->score_local === null || $game->score_visitor === null))
                                             <button type="button" 
                                                     class="text-green-600 hover:text-green-900" 
                                                     title="Agregar resultado"
@@ -214,15 +211,6 @@
                                                 <i class="fas fa-plus-circle"></i>
                                             </button>
                                         @endif
-                                        
-                                        <form action="{{ route('admin.games.duplicate', $game) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" 
-                                                    class="text-purple-600 hover:text-purple-900" 
-                                                    title="Duplicar partido">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
-                                        </form>
                                         
                                         <form action="{{ route('admin.games.destroy', $game) }}" method="POST" class="inline">
                                             @csrf
@@ -277,7 +265,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Goles Visitante</label>
-                                <input type="number" name="away_team_score" min="0" required
+                                <input type="number" name="score_visitor" min="0" required
                                        class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>

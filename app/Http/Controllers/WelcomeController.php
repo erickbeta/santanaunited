@@ -31,7 +31,7 @@ class WelcomeController extends Controller
         $latestResults = Game::with(['homeTeam', 'awayTeam'])
             ->where('game_date', '<', now())
             ->whereNotNull('score_local')
-            ->whereNotNull('away_team_score')
+            ->whereNotNull('score_visitor')
             ->where('is_active', true)
             ->orderBy('game_date', 'desc')
             ->limit(3)
