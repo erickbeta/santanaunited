@@ -5,19 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Player;
 use Illuminate\Http\Request;
-use App\Models\Team; 
+use App\Models\Team;
+use Illuminate\Support\Facades\Storage;
 
 class AdminPlayerController extends Controller
 {
-    // NO NECESITAS EL CONSTRUCTOR AQUÍ. 
-    // Los middlewares (auth y permisos) se aplican en web.php.
-
     /**
      * Muestra la lista de jugadores para el administrador.
      */
     public function index()
     {
-        // authorizeResource vincula esta acción a PlayerPolicy::viewAny().
         $players = Player::with('team')->paginate(15); 
         return view('admin.players.index', compact('players'));
     }
@@ -27,7 +24,6 @@ class AdminPlayerController extends Controller
      */
     public function create()
     {
-        // authorizeResource vincula esta acción a PlayerPolicy::create().
         $teams = Team::all(); 
         return view('admin.players.create', compact('teams'));
     }
@@ -35,37 +31,50 @@ class AdminPlayerController extends Controller
     /**
      * Almacena un jugador recién creado.
      */
-        public function store(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'game_date'      => 'required|date|after:now',
-            'location'       => 'required|string|max:255',
-            'team1'          => 'required|string|max:255', 
-            'team2'          => 'required|string|max:255|different:team1',
-            'competition'    => 'required|string|max:255',
-            'type'           => 'required|in:local,visitante',
-            
+            'name'          => 'required|string|max:255',
+            'team_id'       => 'required|exists:teams,id',
+            'birth_date'    => 'nullable|date|before:today',
+            'jersey_number' => 'nullable|integer|min:0|max:99',
+            'position'      => 'nullable|string|max:50',
+            'goals'         => 'nullable|integer|min:0',
+            'assists'       => 'nullable|integer|min:0',
+            'photo_url'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'is_active'     => 'nullable|boolean',
+            'is_featured'   => 'nullable|boolean',
         ]);
 
-        $gameData = array_merge($validated, [
-            'score_local'     => null, 
-            'away_team_score' => null,
-            'created_by'      => auth()->id(), 
-        ]);
-        
-        Game::create($gameData); 
+        // Manejar la subida de la foto
+        if ($request->hasFile('photo_url')) {
+            $path = $request->file('photo_url')->store('players', 'public');
+            $validated['photo_url'] = $path;
+        }
+
+        // Convertir checkboxes a booleanos
+        $validated['is_active'] = $request->has('is_active') ? true : false;
+        $validated['is_featured'] = $request->has('is_featured') ? true : false;
+
+        // Calcular edad si hay fecha de nacimiento
+        if (isset($validated['birth_date'])) {
+            $birthDate = new \DateTime($validated['birth_date']);
+            $today = new \DateTime();
+            $validated['age'] = $today->diff($birthDate)->y;
+        }
+
+        Player::create($validated);
+
         return redirect()
-            ->route('admin.games.index')
-            ->with('success', 'Partido creado exitosamente.');
+            ->route('admin.players.index')
+            ->with('success', 'Jugador creado exitosamente.');
     }
-
 
     /**
      * Muestra un jugador específico.
      */
     public function show(Player $player)
     {
-        // authorizeResource vincula esta acción a PlayerPolicy::view($user, $player).
         return view('admin.players.show', compact('player'));
     }
 
@@ -74,7 +83,6 @@ class AdminPlayerController extends Controller
      */
     public function edit(Player $player)
     {
-        // authorizeResource vincula esta acción a PlayerPolicy::update($user, $player).
         $teams = Team::all(); 
         return view('admin.players.edit', compact('player', 'teams'));
     }
@@ -84,17 +92,46 @@ class AdminPlayerController extends Controller
      */
     public function update(Request $request, Player $player)
     {
-        // authorizeResource vincula esta acción a PlayerPolicy::update($user, $player).
-        $validatedData = $request->validate([
-            'team_id' => 'required|exists:teams,id',
-            'name' => 'required|string|max:255',
-            // ... otras reglas de validación
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'team_id'       => 'required|exists:teams,id',
+            'birth_date'    => 'nullable|date|before:today',
+            'jersey_number' => 'nullable|integer|min:0|max:99',
+            'position'      => 'nullable|string|max:50',
+            'goals'         => 'nullable|integer|min:0',
+            'assists'       => 'nullable|integer|min:0',
+            'photo_url'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'is_active'     => 'nullable|boolean',
+            'is_featured'   => 'nullable|boolean',
         ]);
-        
-        $player->update($validatedData);
 
-        return redirect()->route('admin.players.index')
-                         ->with('success', 'Jugador actualizado exitosamente.');
+        // Manejar la nueva foto
+        if ($request->hasFile('photo_url')) {
+            // Eliminar foto anterior si existe
+            if ($player->photo_url && Storage::disk('public')->exists($player->photo_url)) {
+                Storage::disk('public')->delete($player->photo_url);
+            }
+            
+            $path = $request->file('photo_url')->store('players', 'public');
+            $validated['photo_url'] = $path;
+        }
+
+        // Convertir checkboxes a booleanos
+        $validated['is_active'] = $request->has('is_active') ? true : false;
+        $validated['is_featured'] = $request->has('is_featured') ? true : false;
+
+        // Recalcular edad si cambió la fecha de nacimiento
+        if (isset($validated['birth_date'])) {
+            $birthDate = new \DateTime($validated['birth_date']);
+            $today = new \DateTime();
+            $validated['age'] = $today->diff($birthDate)->y;
+        }
+
+        $player->update($validated);
+
+        return redirect()
+            ->route('admin.players.index')
+            ->with('success', 'Jugador actualizado exitosamente.');
     }
 
     /**
@@ -102,10 +139,15 @@ class AdminPlayerController extends Controller
      */
     public function destroy(Player $player)
     {
-        // authorizeResource vincula esta acción a PlayerPolicy::delete($user, $player).
+        // Eliminar foto si existe
+        if ($player->photo_url && Storage::disk('public')->exists($player->photo_url)) {
+            Storage::disk('public')->delete($player->photo_url);
+        }
+
         $player->delete();
 
-        return redirect()->route('admin.players.index')
-                         ->with('success', 'Jugador eliminado exitosamente.');
+        return redirect()
+            ->route('admin.players.index')
+            ->with('success', 'Jugador eliminado exitosamente.');
     }
 }

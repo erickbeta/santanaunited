@@ -119,16 +119,33 @@ class AdminGameController extends Controller
 
     public function update(Request $request, Game $game)
     {
-        $validated = $request->validate([
-            'team1_id'            => 'required|exists:teams,id',
-            'team2_id'            => 'required|exists:teams,id|different:team1_id',
-            'visitor_designation' => 'required|in:team1,team2',
-            'game_date'           => 'required|date',
-            'location'            => 'required|string|max:255',
-            'competition'         => 'required|string|max:255',
-            'score_local'         => 'nullable|integer|min:0',
-            'score_visitor'       => 'nullable|integer|min:0',
-        ]);
+        $rules = [
+            'team1_id'              => 'required|exists:teams,id',
+            'team2_id'              => 'required|exists:teams,id|different:team1_id',
+            'visitor_designation'   => 'required|in:team1,team2',
+            'game_date'             => 'required|date',
+            'location'              => 'required|string|max:255',
+            'competition'           => 'required|string|max:255',
+            
+            // CORRECCIÓN CLAVE: Usar 'score_visitor' para el visitante
+            'score_local'           => 'nullable|integer|min:0',
+            'score_visitor'         => 'nullable|integer|min:0', 
+        ];
+
+        // 1. Validar datos básicos
+        $validated = $request->validate($rules);
+
+        // 2. VALIDACIÓN CONDICIONAL DE MARCADOR
+        // Si se rellena un score, el otro también es obligatorio (para evitar estados inconsistentes)
+        if ($request->filled('score_local') || $request->filled('score_visitor')) {
+            $request->validate([
+                'score_local' => 'required|integer|min:0',
+                'score_visitor' => 'required|integer|min:0', // Usamos score_visitor
+            ], [
+                'score_local.required' => 'Debes ingresar el puntaje Local para finalizar el partido.',
+                'score_visitor.required' => 'Debes ingresar el puntaje Visitante para finalizar el partido.',
+            ]);
+        }
 
         // Determinar quién es local y quién visitante
         if ($validated['visitor_designation'] === 'team1') {
@@ -138,17 +155,20 @@ class AdminGameController extends Controller
             $homeTeamId = $validated['team1_id'];
             $awayTeamId = $validated['team2_id'];
         }
-
+        
+        // 3. Actualizar
         $game->update([
-            'team1_id'        => $validated['team1_id'],
-            'team2_id'        => $validated['team2_id'],
-            'home_team_id'    => $homeTeamId,
-            'away_team_id'    => $awayTeamId,
-            'game_date'       => $validated['game_date'],
-            'location'        => $validated['location'],
-            'competition'     => $validated['competition'],
-            'score_local'     => $validated['score_local'] ?? null,
-            'score_visitor'   => $validated['score_visitor'] ?? null,
+            'team1_id'          => $validated['team1_id'],
+            'team2_id'          => $validated['team2_id'],
+            'home_team_id'      => $homeTeamId,
+            'away_team_id'      => $awayTeamId,
+            'game_date'         => $validated['game_date'],
+            'location'          => $validated['location'],
+            'competition'       => $validated['competition'],
+            
+            // CORRECCIÓN: Guardar en la columna score_visitor de la BD
+            'score_local'       => $request->input('score_local') !== null ? (int)$request->input('score_local') : null,
+            'score_visitor'     => $request->input('score_visitor') !== null ? (int)$request->input('score_visitor') : null,
         ]);
 
         return redirect()
@@ -167,9 +187,10 @@ class AdminGameController extends Controller
 
     public function updateScore(Request $request, Game $game)
     {
+        // CORRECCIÓN CLAVE: Usamos 'score_visitor'
         $validated = $request->validate([
             'score_local'   => 'required|integer|min:0',
-            'score_visitor' => 'required|integer|min:0',
+            'score_visitor' => 'required|integer|min:0', 
         ]);
 
         $game->update($validated);

@@ -10,7 +10,11 @@ class GameController extends Controller
 {
     public function index (Request $request)
     {
-        $games = Game::latest()->paginate(10);
+        $games = Game::with(['homeTeam', 'awayTeam',])
+            ->latest()
+            ->paginate(10);
+
+            
         return view('games.index', compact('games'));
     }
 }

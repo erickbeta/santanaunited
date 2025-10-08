@@ -137,6 +137,20 @@
                             Noticias
                         </div>
                     </a>
+
+                    <!-- Home Content -->
+                    <a href="{{ route('admin.home-content.index') }}" 
+                    @class([
+                        'group flex items-center px-3 py-3 rounded-xl text-gray-100 hover:bg-gradient-to-r hover:from-teal-600 hover:to-teal-500 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg',
+                        'bg-gradient-to-r from-teal-600 to-teal-500 shadow-lg' => request()->routeIs('admin.home-content.*')
+                    ])>
+                        <i class="fa-solid fa-home text-lg w-5"></i>
+                        <span x-show="!sidebarCollapsed" x-transition class="ml-3 font-medium">Home Content</span>
+                        <div x-show="sidebarCollapsed" class="absolute left-16 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            Home Content
+                        </div>
+                    </a>
+
                 </nav>
 
                 <!-- Información del usuario en el sidebar -->
@@ -279,6 +293,14 @@
                         </a>
                         <a href="{{ route('admin.posts.index') }}" @class(['flex items-center px-3 py-3 rounded-xl text-gray-100 hover:bg-red-600 transition-all duration-200', 'bg-red-600' => request()->routeIs('admin.posts.*')])>
                             <i class="fa-solid fa-newspaper mr-3"></i> Noticias
+                        </a>
+                        
+                        <a href="{{ route('admin.home-content.index') }}" 
+                        @class([
+                            'flex items-center px-3 py-3 rounded-xl text-gray-100 hover:bg-teal-600 transition-all duration-200', 
+                            'bg-teal-600' => request()->routeIs('admin.home-content.*')
+                        ])>
+                            <i class="fa-solid fa-home mr-3"></i> Home Content
                         </a>
                     </nav>
 

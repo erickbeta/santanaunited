@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\AdminGameController;
 use App\Http\Controllers\Admin\AdminPostController;
 use App\Http\Controllers\Admin\AdminPlayerController;
 use App\Http\Controllers\Admin\AdminTeamController;
-
+use App\Http\Controllers\Admin\AdminHomeContentController;
 
 
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
@@ -34,10 +34,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     })->name('dashboard');
 
     Route::resource('carousel', AdminCarouselImageController::class);
+    
+    // Ruta para actualizar score - DEBE estar ANTES del resource
+    Route::patch('games/{game}/update-score', [AdminGameController::class, 'updateScore'])
+        ->name('games.update-score');
+    
     Route::resource('games', AdminGameController::class);
     Route::resource('posts', AdminPostController::class);
     Route::resource('players', AdminPlayerController::class);
     Route::resource('teams', AdminTeamController::class);
+
+    Route::get('/home-content', [AdminHomeContentController::class, 'index'])
+        ->name('home-content.index');
+    Route::get('/home-content/{section}/edit', [AdminHomeContentController::class, 'edit'])
+        ->name('home-content.edit');
+    Route::put('/home-content/{section}', [AdminHomeContentController::class, 'update'])
+        ->name('home-content.update');
+    Route::patch('/home-content/{section}/toggle', [AdminHomeContentController::class, 'toggleActive'])
+        ->name('home-content.toggle');
 
 });
 
@@ -47,5 +61,13 @@ Route::get('/players', [PlayerController::class, 'index'])->name('players.index'
 Route::get('/players/{player}', [PlayerController::class, 'show'])->name('players.show');
 Route::get('/standings', [TeamController::class, 'index'])->name('stats.index');
 
+    Route::get('/home-content', [AdminHomeContentController::class, 'index'])
+        ->name('home-content.index');
+    Route::get('/home-content/{section}/edit', [AdminHomeContentController::class, 'edit'])
+        ->name('home-content.edit');
+    Route::put('/home-content/{section}', [AdminHomeContentController::class, 'update'])
+        ->name('home-content.update');
+    Route::patch('/home-content/{section}/toggle', [AdminHomeContentController::class, 'toggleActive'])
+        ->name('home-content.toggle');
 
 require __DIR__.'/auth.php';
