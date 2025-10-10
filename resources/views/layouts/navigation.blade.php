@@ -4,7 +4,7 @@
         
         <!-- Logo and Main Navigation Section -->
         <div class="flex items-center space-x-8">
-            <a href="#">
+            <a href="/">
                 <x-application-logo class="block h-8 fill-current text-gray-800" style="margin-top:-20px;" />
             </a>
         </div>
